@@ -13,7 +13,32 @@ const app = express();
 
 // Middleware
 app.use(cors());                // Allow cross-origin requests
-app.use(express.json());        // Parse JSON request bodies
+
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
+
+// Parse JSON request bodies with increased logging
+app.use(express.json({
+  verify: (req, res, buf) => {
+    try {
+      JSON.parse(buf.toString());
+    } catch (e) {
+      console.error('Invalid JSON received:', buf.toString());
+      throw new Error('Invalid JSON');
+    }
+  }
+}));
+
+// Add body logging for debugging
+app.use((req, res, next) => {
+  if (req.method === 'POST' || req.method === 'PUT') {
+    console.log('Request body:', req.body);
+  }
+  next();
+});
 
 // Routes
 app.use('/tasks', taskRoutes);  // Mount task routes at /tasks endpoint
