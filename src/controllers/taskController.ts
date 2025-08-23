@@ -4,13 +4,21 @@ import Task from '../models/Task';
 // Create a new task
 export const createTask = async (req: Request, res: Response) => {
   try {
+    console.log('⭐ CREATE TASK ENDPOINT CALLED ⭐');
+    console.log('Request headers:', req.headers);
+    console.log('Request body type:', typeof req.body);
+    console.log('Request body content:', JSON.stringify(req.body, null, 2));
+    
     // Get task data from request body
     const { title, description, status } = req.body;
     
     // Check if title is provided
     if (!title) {
+      console.log('❌ Title is missing from request');
       return res.status(400).json({ message: 'Title is required' });
     }
+    
+    console.log('✅ Title is valid:', title);
     
     // Create a new task
     const newTask = new Task({
@@ -19,13 +27,21 @@ export const createTask = async (req: Request, res: Response) => {
       status: status || 'pending'
     });
     
+    console.log('📝 Task object created:', newTask);
+    
     // Save task to database
+    console.log('💾 Attempting to save to database...');
     const savedTask = await newTask.save();
+    console.log('✅ Task saved successfully:', savedTask);
     
     // Return success response with the created task
     res.status(201).json(savedTask);
   } catch (error) {
-    console.error('Error creating task:', error);
+    console.error('❌ Error creating task:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     res.status(500).json({ message: 'Error creating task' });
   }
 };
